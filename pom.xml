@@ -14,6 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.2.0</kotlin.version>
         <junit.version>4.12</junit.version>
+        <stringtemplate.version>4.0.8</stringtemplate.version>
+        <jcommander.version>1.72</jcommander.version>
     </properties>
 
     <dependencies>
@@ -33,6 +35,16 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>${stringtemplate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>${jcommander.version}</version>
         </dependency>
     </dependencies>
 
