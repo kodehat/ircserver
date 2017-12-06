@@ -4,17 +4,17 @@ class Log {
 
     companion object {
 
-        var DEBUG = true
+        var DEBUG = false
 
         fun <T> info(javaClass: Class<T>?, message: String) {
             if (!DEBUG) return
-            val className = javaClass?.name ?: "???"
+            val className = javaClass?.simpleName ?: "???"
             println("INFO [$className]: $message")
         }
 
-        fun info(message: String) {
+        fun info(className: String, message: String) {
             if (!DEBUG) return
-            println("INFO [???]: $message")
+            println("INFO [$className]: $message")
         }
     }
 

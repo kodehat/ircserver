@@ -13,4 +13,7 @@ class Args {
     @Parameter(names = ["-h", "--help"], description = "Shows the help page", help = true)
     var help: Boolean = false
 
+    @Parameter(names = ["-v", "--verbose"], description = "Shows debug information")
+    var debug: Boolean = false
+
 }

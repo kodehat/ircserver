@@ -1,9 +1,13 @@
 package de.codehat.ircserver.server
 
-class IRCServer(private val host: String = "localhost",
-                private val port: Int = 6667) : IServer {
+import de.codehat.ircserver.client.ClientList
 
-    private var serverThread: ServerThread? = null
+class IRCServer(val host: String,
+                val port: Int) : IServer {
+
+    var serverThread: ServerThread? = null
+        private set
+    val clientList = ClientList()
 
     override fun start(): Boolean {
         if (this.serverThread == null) {
@@ -21,6 +25,7 @@ class IRCServer(private val host: String = "localhost",
         if (newObject) {
             this.serverThread = ServerThread(this)
         }
+        this.serverThread!!.isRunning = true
         this.serverThread!!.start()
     }
 
