@@ -1,5 +1,7 @@
 package de.codehat.ircserver.client
 
+import de.codehat.ircserver.command.Message
+import de.codehat.ircserver.util.Entry
 import de.codehat.ircserver.util.Log
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -12,26 +14,32 @@ class ClientThread(private val client: Client, private val socket: Socket) : Run
     private val inputStream = BufferedReader(InputStreamReader(this.socket.getInputStream()))
 
     override fun run() {
-        Log.info(this.javaClass, "${getIpAndPort()} started his thread")
+        Log.info(this.javaClass, "${getId()} started his thread")
         try {
             this.inputStream.forEachLine {
-                //TODO: Trim 'it'
-                if (!this.client.server.commandRegistry.commandExists(it.split(" +")[0])) {
-                    Log.info(this.javaClass, "${getIpAndPort()} sent unknown command '$it'")
-                    this.client.queue().put("${it.split(" +")[0]} :Unknown command")
+                val commandParts = it.trim().split(Regex(" +"))
+                Log.info(this.javaClass, "Got command '${commandParts[0]}'")
+                if (!this.client.server.commandRegistry.commandExists(commandParts[0])) {
+                    val response = Message.ERR_UNKNOWNCOMMAND.getTemplate()
+                            .add("nick", this.client.info().nickname ?: "*")
+                            .add("command", it)
+                            .render()
+                    Log.info(this.javaClass, "${getId()} sent unknown command '$it'")
+                    this.client.queue().put(Entry(this.client, response))
+                } else {
+                    Log.info(this.javaClass, "${getId()} sent command '${commandParts[0]}'")
+                    this.client.server.queue.put(Entry(this.client, it))
                 }
-                Log.info(this.javaClass, "${getIpAndPort()} sent command '$it'")
-                this.client.server.queue.put(it)
             }
         } catch (e: SocketException) {
             // Socket timeout
         }
 
-        Log.info(this.javaClass, "${getIpAndPort()} has disconnected")
+        Log.info(this.javaClass, "${getId()} has disconnected")
         ClientList.removeClient(this.client.info().id)
         this.client.close()
     }
 
-    private fun getIpAndPort() = "{${this.client.info().host}:${this.client.info().port}}"
+    private fun getId() = "{${this.client.info().id}}"
 
 }

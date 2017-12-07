@@ -4,10 +4,12 @@ import de.codehat.ircserver.client.Client
 import de.codehat.ircserver.client.ClientInfo
 import de.codehat.ircserver.client.ClientList
 import de.codehat.ircserver.command.Message
+import de.codehat.ircserver.util.Entry
 import de.codehat.ircserver.util.Log
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.TimeUnit
 
 class ServerThread(private val server: IRCServer) : Thread() {
 
@@ -45,7 +47,11 @@ class ServerThread(private val server: IRCServer) : Thread() {
                 this.server.clientThreadPool.execute(client.clientThread)
             } catch (e: RejectedExecutionException) {
                 Log.info(this.javaClass, "Client ${clientInfo.id} was rejected")
-                client.queue().put(Message.ERR_RESTRICTED.getRaw())
+                val response = Message.ERR_RESTRICTED.getTemplate()
+                        .add("nick", "*")
+                        .render()
+                client.queue().put(Entry(client, response))
+                TimeUnit.MILLISECONDS.sleep(500)
                 client.close()
                 ClientList.removeClient(clientInfo.id)
             }

@@ -4,10 +4,10 @@ import java.util.concurrent.LinkedBlockingQueue
 
 class CommandQueue {
 
-    private val queue = LinkedBlockingQueue<String>()
+    private val queue = LinkedBlockingQueue<Entry>()
 
-    fun get(): String = this.queue.take()
-    fun put(command: String) = this.queue.put(command)
+    fun get(): Entry = this.queue.take()
+    fun put(entry: Entry) = this.queue.put(entry)
     fun size() = this.queue.size
 
 }

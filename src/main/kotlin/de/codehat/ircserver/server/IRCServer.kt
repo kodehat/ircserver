@@ -19,14 +19,15 @@ class IRCServer(val host: String,
             0L,
             TimeUnit.MILLISECONDS,
             SynchronousQueue<Runnable>())
-    //Executors.newFixedThreadPool(this.maxClients) as ThreadPoolExecutor
     val serverThread = ServerThread(this)
-    private val commandThread = CommandWorkerThread(this.queue, {
-        this.commandRegistry.execute(it.split(" +")[0], it)
+
+    private val commandThread = CommandWorkerThread(this.queue, { client, cmd ->
+        this.commandRegistry.execute(client, cmd.split(Regex(" +"))[0], cmd)
     })
 
     override fun start() {
         if (this.serverThread.isRunning) throw ServerAlreadyStartedException()
+        this.commandThread.start()
         this.serverThread.start()
     }
 

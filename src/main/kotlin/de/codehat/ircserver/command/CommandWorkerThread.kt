@@ -1,9 +1,12 @@
 package de.codehat.ircserver.command
 
+import de.codehat.ircserver.client.IClient
 import de.codehat.ircserver.util.CommandQueue
+import de.codehat.ircserver.util.Entry
 import de.codehat.ircserver.util.Log
 
-class CommandWorkerThread(private val queue: CommandQueue, private val commandAction: (cmd: String) -> Unit): Thread() {
+class CommandWorkerThread(private val queue: CommandQueue,
+                          private val commandAction: (client: IClient, command: String) -> Unit): Thread() {
 
     var isRunning = false
 
@@ -13,12 +16,12 @@ class CommandWorkerThread(private val queue: CommandQueue, private val commandAc
     }
 
     override fun run() {
-        var fromQueue: String? = null
+        var fromQueue: Entry?
         while (isRunning) {
             try {
                 fromQueue = this.queue.get()
 
-                this.commandAction(fromQueue)
+                this.commandAction(fromQueue.client, fromQueue.command)
             } catch (e: InterruptedException) {
                 this.isRunning = false
                 Log.Companion.info(this.javaClass, "Queue was interrupted")

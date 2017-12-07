@@ -12,9 +12,9 @@ class Client(private val socket: Socket, private val clientInfo: ClientInfo, val
     val clientThread = ClientThread(this, this.socket)
     private val queue = CommandQueue()
     private val outputStream = PrintWriter(this.socket.getOutputStream(), true)
-    private val commandThread = CommandWorkerThread(this.queue, {
-        Log.Companion.info(this.javaClass, "Sending '$it' to client with id ${this.clientInfo.id}")
-        this.outputStream.println(it)
+    private val commandThread = CommandWorkerThread(this.queue, { _, cmd ->
+        Log.info(this.javaClass, "Sending '$cmd' to client with id ${this.clientInfo.id}")
+        this.outputStream.println(cmd)
     })
 
     override fun start() {
@@ -30,7 +30,7 @@ class Client(private val socket: Socket, private val clientInfo: ClientInfo, val
     }
 
     override fun state(): ClientState {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return this.clientInfo.state
     }
 
     override fun queue(): CommandQueue {
