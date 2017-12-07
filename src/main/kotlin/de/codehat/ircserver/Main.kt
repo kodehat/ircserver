@@ -22,7 +22,8 @@ fun main(args: Array<String>) {
     }
     if (argObject.debug) Log.DEBUG = true
     Log.info("Main", "Starting IRCServer at ${argObject.host}:${argObject.port}")
-    val ircServer = IRCServer(argObject.host, argObject.port)
-    ircServer.start()
-    ircServer.serverThread!!.join()
+    IRCServer(argObject.host, argObject.port, argObject.maxClients).apply {
+        start()
+        serverThread.join()
+    }
 }

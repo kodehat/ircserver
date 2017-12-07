@@ -4,9 +4,16 @@ import de.codehat.ircserver.util.CommandQueue
 
 interface IClient {
 
-    fun start(): Boolean
+    /**
+     * @throws [ClientAlreadyStartedException]
+     */
+    fun start()
+
+    /**
+     * @throws [ClientAlreadyClosedException]
+     */
+    fun close()
     fun info(): ClientInfo
-    fun close(): Boolean
     fun state(): ClientState
     fun queue(): CommandQueue
 

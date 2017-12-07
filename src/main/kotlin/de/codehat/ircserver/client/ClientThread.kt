@@ -3,22 +3,33 @@ package de.codehat.ircserver.client
 import de.codehat.ircserver.util.Log
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.io.PrintWriter
 import java.net.Socket
+import java.net.SocketException
 
-class ClientThread(private val client: Client, private val socket: Socket) : Thread() {
+class ClientThread(private val client: Client, private val socket: Socket) : Runnable {
 
     var isRunning = false
     private val inputStream = BufferedReader(InputStreamReader(this.socket.getInputStream()))
-    private val outputStream = PrintWriter(this.socket.getOutputStream(), true)
 
     override fun run() {
         Log.info(this.javaClass, "${getIpAndPort()} started his thread")
-        this.inputStream.forEachLine {
-            Log.info(this.javaClass, "${getIpAndPort()} sent '$it'")
+        try {
+            this.inputStream.forEachLine {
+                //TODO: Trim 'it'
+                if (!this.client.server.commandRegistry.commandExists(it.split(" +")[0])) {
+                    Log.info(this.javaClass, "${getIpAndPort()} sent unknown command '$it'")
+                    this.client.queue().put("${it.split(" +")[0]} :Unknown command")
+                }
+                Log.info(this.javaClass, "${getIpAndPort()} sent command '$it'")
+                this.client.server.queue.put(it)
+            }
+        } catch (e: SocketException) {
+            // Socket timeout
         }
+
         Log.info(this.javaClass, "${getIpAndPort()} has disconnected")
-        this.client.server.clientList.removeClient(this.client.info().id)
+        ClientList.removeClient(this.client.info().id)
+        this.client.close()
     }
 
     private fun getIpAndPort() = "{${this.client.info().host}:${this.client.info().port}}"

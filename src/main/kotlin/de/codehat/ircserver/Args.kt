@@ -10,6 +10,9 @@ class Args {
     @Parameter(names = ["-p", "--port"], description = "The port the server listens on")
     var port: Int = 6667
 
+    @Parameter(names = ["-c", "--clients"], description = "Maximum amount of parallel client connections")
+    var maxClients: Int = 20
+
     @Parameter(names = ["-h", "--help"], description = "Shows the help page", help = true)
     var help: Boolean = false
 

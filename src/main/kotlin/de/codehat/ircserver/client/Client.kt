@@ -1,22 +1,32 @@
 package de.codehat.ircserver.client
 
+import de.codehat.ircserver.command.CommandWorkerThread
 import de.codehat.ircserver.server.IRCServer
 import de.codehat.ircserver.util.CommandQueue
+import de.codehat.ircserver.util.Log
+import java.io.PrintWriter
 import java.net.Socket
 
 class Client(private val socket: Socket, private val clientInfo: ClientInfo, val server: IRCServer) : IClient {
 
-    private var clientThread = ClientThread(this, this.socket)
+    val clientThread = ClientThread(this, this.socket)
+    private val queue = CommandQueue()
+    private val outputStream = PrintWriter(this.socket.getOutputStream(), true)
+    private val commandThread = CommandWorkerThread(this.queue, {
+        Log.Companion.info(this.javaClass, "Sending '$it' to client with id ${this.clientInfo.id}")
+        this.outputStream.println(it)
+    })
 
-    override fun start(): Boolean {
-        if (this.clientThread.isRunning) return false
+    override fun start() {
+        if (this.commandThread.isRunning && this.clientThread.isRunning) throw ClientAlreadyStartedException()
         this.clientThread.isRunning = true
-        this.clientThread.start()
-        return true
+        this.commandThread.start()
     }
 
-    override fun close(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun close() {
+        if (this.socket.isClosed && this.clientInfo.state == ClientState.CLOSED) throw ClientAlreadyClosedException()
+        this.clientInfo.state = ClientState.CLOSED
+        this.socket.close()
     }
 
     override fun state(): ClientState {
@@ -24,7 +34,7 @@ class Client(private val socket: Socket, private val clientInfo: ClientInfo, val
     }
 
     override fun queue(): CommandQueue {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return this.queue
     }
 
     override fun info(): ClientInfo {
