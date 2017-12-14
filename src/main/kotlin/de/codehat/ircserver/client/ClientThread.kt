@@ -37,7 +37,7 @@ class ClientThread(private val client: Client, private val socket: Socket) : Run
 
         Log.info(this.javaClass, "${getId()} has disconnected")
         ClientList.removeClient(this.client.info().id)
-        this.client.close()
+        if (this.client.info().state != ClientState.CLOSED) this.client.close()
     }
 
     private fun getId() = "{${this.client.info().id}}"

@@ -15,8 +15,6 @@ class Util {
             val printWriter = PrintWriter(socket.getOutputStream(), true)
             return Triple(socket, bufferedReader, printWriter)
         }
-
-        fun sleep(timeout: Long) = TimeUnit.MILLISECONDS.sleep(timeout)
     }
 
 }

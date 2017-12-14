@@ -3,9 +3,7 @@ package de.codehat.ircserver.server
 import de.codehat.ircserver.command.CommandRegistry
 import de.codehat.ircserver.command.CommandWorkerThread
 import de.codehat.ircserver.util.CommandQueue
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 class IRCServer(val host: String,
                 val port: Int,
@@ -13,12 +11,7 @@ class IRCServer(val host: String,
 
     val queue = CommandQueue()
     val commandRegistry = CommandRegistry(this)
-    val clientThreadPool: ThreadPoolExecutor = ThreadPoolExecutor(
-            this.maxClients,
-            this.maxClients,
-            0L,
-            TimeUnit.MILLISECONDS,
-            SynchronousQueue<Runnable>())
+    val clientThreadPool: ThreadPoolExecutor = Executors.newFixedThreadPool(this.maxClients) as ThreadPoolExecutor
     val serverThread = ServerThread(this)
 
     private val commandThread = CommandWorkerThread(this.queue, { client, cmd ->
