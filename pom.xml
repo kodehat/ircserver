@@ -12,7 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.2.0</kotlin.version>
+        <kotlin.version>1.2.10</kotlin.version>
         <junit.version>4.12</junit.version>
         <stringtemplate.version>4.0.8</stringtemplate.version>
         <jcommander.version>1.72</jcommander.version>
@@ -30,16 +30,28 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
         <!--<dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>-->
+        <!--<dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>1.0.2</version>
+            <scope>test</scope>
+        </dependency>-->
         <dependency>
             <groupId>org.jetbrains.spek</groupId>
             <artifactId>spek-junit-platform-engine</artifactId>
             <version>1.1.5</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.spek</groupId>
@@ -112,19 +124,14 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>2.19</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.junit.platform</groupId>
                         <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>1.0.0</version>
+                        <version>1.0.2</version>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <includes>
-                        <include>**/*Spec.*</include>
-                    </includes>
-                </configuration>
             </plugin>
         </plugins>
     </build>
