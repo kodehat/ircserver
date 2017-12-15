@@ -26,12 +26,16 @@ object ClientList {
         }
     }
 
-    fun getClientById(id: Int) {
-        this.clients[id]
+    fun getClientById(id: Int): IClient? {
+        synchronized(clients) {
+            return this.clients[id]
+        }
     }
 
     fun getClientByNick(nick: String): IClient? {
-        return this.clients.values.find { it.info().nickname == nick }
+        synchronized(clients) {
+            return this.clients.values.find { it.info().nickname == nick }
+        }
     }
 
     fun getNextId() = this.nextId.get()

@@ -51,9 +51,33 @@ class IRCServerTest {
 
         val expected = ":localhost 433 * eric :Nickname is already in use"
 
-        socketOne.close()
-        socketTwo.close()
+        //socketOne.close()
+        //socketTwo.close()
         server.stop()
+
+        assertTrue(outputs.contains(expected))
+    }
+
+    @Test
+    fun testWelcomeMessage() {
+        val server = IRCServer(host, port, maxClients)
+        server.start()
+        val (socketOne, bufferedReaderOne, printWriterOne) = Util.connect(host, port)
+        val outputs = mutableListOf<String>()
+
+        Thread({
+            bufferedReaderOne.forEachLine {
+                Log.info(this.javaClass, "Got: $it")
+                outputs.add(it)
+            }
+        }).start()
+
+        printWriterOne.println("NICK eric")
+        printWriterOne.println("USER eric * * :Eric Test")
+        Thread.sleep(2000)
+        server.stop()
+
+        val expected = ":localhost 001 eric :Welcome to the Internet Relay Network eric!eric@localhost"
 
         assertTrue(outputs.contains(expected))
     }
