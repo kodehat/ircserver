@@ -19,6 +19,7 @@ class ClientThread(private val client: Client, private val socket: Socket) : Run
             this.inputStream.forEachLine {
                 val commandParts = it.trim().split(Regex(" +"))
                 Log.info(this.javaClass, "Got command '${commandParts[0]}'")
+                if (commandParts[0] == "PONG") return@forEachLine // silently drop "PONG" command
                 if (!this.client.server.commandRegistry.commandExists(commandParts[0])) {
                     val response = Message.ERR_UNKNOWNCOMMAND.getTemplate()
                             .add("nick", this.client.info().nickname ?: "*")

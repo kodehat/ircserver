@@ -4,6 +4,9 @@ import com.beust.jcommander.Parameter
 
 class Args {
 
+    @Parameter(names = ["-n", "--name"], description = "The name of this server")
+    var servername: String = "KotlinIRCServer"
+
     @Parameter(names = ["-i", "--ip"], description = "The ip/hostname for the server")
     var host: String = "localhost"
 

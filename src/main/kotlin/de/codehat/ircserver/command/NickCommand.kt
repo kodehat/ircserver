@@ -9,9 +9,10 @@ import de.codehat.ircserver.util.Entry
 class NickCommand(server: IRCServer): Command(server) {
 
     override fun execute(client: IClient, command: String) {
+        val parameter = command.split(Regex(" +"))
+        val nick = parameter[parameter.size - 1]
+
         if (client.state() == ClientState.CONNECTING) {
-            val parameter = command.split(Regex(" +"))
-            val nick = parameter[parameter.size - 1]
             if (ClientList.getClientByNick(nick) != null) { // Nick already in use
                 val response = Message.ERR_NICKNAMEINUSE.getTemplate()
                         .add("host", this.server.host)
@@ -29,8 +30,32 @@ class NickCommand(server: IRCServer): Command(server) {
                         .add("user", client.info().username)
                         .render()
                 client.queue().put(Entry(client, response))
+                val rplYourHost = Message.RPL_YOURHOST.getTemplate()
+                        .add("host", this.server.host)
+                        .add("nick", client.info().nickname)
+                        .add("server_name", this.server.servername)
+                        .add("version", this.server.version)
+                        .render()
+                client.queue().put(Entry(client, rplYourHost))
+                val rplCreated = Message.RPL_CREATED.getTemplate()
+                        .add("host", this.server.host)
+                        .add("nick", client.info().nickname)
+                        .add("date", this.server.date.toString())
+                        .render()
+                client.queue().put(Entry(client, rplCreated))
+                val rplMyInfo = Message.RPL_MYINFO.getTemplate()
+                        .add("host", this.server.host)
+                        .add("nick", client.info().nickname)
+                        .add("server_name", this.server.servername)
+                        .add("version", this.server.version)
+                        .add("user_modes", "ao")
+                        .add("chan_modes", "mtov")
+                        .render()
+                client.queue().put(Entry(client, rplMyInfo))
             }
 
+        } else if (client.state() == ClientState.CONNECTED) {
+            client.info().nickname = nick
         }
     }
 

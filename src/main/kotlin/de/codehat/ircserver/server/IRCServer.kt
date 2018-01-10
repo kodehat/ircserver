@@ -3,11 +3,15 @@ package de.codehat.ircserver.server
 import de.codehat.ircserver.command.CommandRegistry
 import de.codehat.ircserver.command.CommandWorkerThread
 import de.codehat.ircserver.util.CommandQueue
+import java.util.*
 import java.util.concurrent.*
 
 class IRCServer(val host: String,
                 val port: Int,
-                private val maxClients: Int) : IServer {
+                private val maxClients: Int,
+                val servername: String,
+                val version: String,
+                val date: Date = Date()) : IServer {
 
     val queue = CommandQueue()
     val commandRegistry = CommandRegistry(this)

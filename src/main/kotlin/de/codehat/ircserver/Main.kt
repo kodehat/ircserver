@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
     }
     if (argObject.debug) Log.DEBUG = true
     Log.info("Main", "Starting IRCServer at ${argObject.host}:${argObject.port}")
-    val server = IRCServer(argObject.host, argObject.port, argObject.maxClients)
+    val server = IRCServer(argObject.host, argObject.port, argObject.maxClients, argObject.servername, "1.0")
     server.start()
     /*Runtime.getRuntime().addShutdownHook(Thread({
         Log.info("Main", "Exit signal received. Disconnecting all clients...")

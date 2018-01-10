@@ -12,6 +12,8 @@ class CommandRegistry(private val server: IRCServer) {
         this.addCommand("NICK", NickCommand(this.server))
         this.addCommand("USER", UserCommand(this.server))
         this.addCommand("CAP", CapCommand(this.server))
+        this.addCommand("PRIVMSG", PrivateMessageCommand(this.server))
+        this.addCommand("PING", PingCommand(this.server))
     }
 
     fun getCommand(mainCommand: String): Command? {

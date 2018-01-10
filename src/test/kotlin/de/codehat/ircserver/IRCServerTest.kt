@@ -23,7 +23,7 @@ class IRCServerTest {
 
     @Test
     fun testServerCanStart() {
-        val server = IRCServer(host, port, maxClients)
+        val server = IRCServer(host, port, maxClients, "TestServer", "1.0")
         server.start()
         Thread.sleep(250)
         assertTrue(server.isRunning())
@@ -32,7 +32,7 @@ class IRCServerTest {
 
     @Test
     fun testSameNickTwice() {
-        val server = IRCServer(host, port, maxClients)
+        val server = IRCServer(host, port, maxClients,"TestServer", "1.0")
         server.start()
         val (socketOne, bufferedReaderOne, printWriterOne) = Util.connect(host, port)
         val (socketTwo, bufferedReaderTwo, printWriterTwo) = Util.connect(host, port)
@@ -51,8 +51,6 @@ class IRCServerTest {
 
         val expected = ":localhost 433 * eric :Nickname is already in use"
 
-        //socketOne.close()
-        //socketTwo.close()
         server.stop()
 
         assertTrue(outputs.contains(expected))
@@ -60,7 +58,7 @@ class IRCServerTest {
 
     @Test
     fun testWelcomeMessage() {
-        val server = IRCServer(host, port, maxClients)
+        val server = IRCServer(host, port, maxClients, "TestServer", "1.0")
         server.start()
         val (socketOne, bufferedReaderOne, printWriterOne) = Util.connect(host, port)
         val outputs = mutableListOf<String>()
