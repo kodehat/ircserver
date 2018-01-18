@@ -13,14 +13,17 @@ class CommandRegistry(private val server: IRCServer) {
         this.addCommand("USER", UserCommand(this.server))
         this.addCommand("CAP", CapCommand(this.server))
         this.addCommand("PRIVMSG", PrivateMessageCommand(this.server))
+        this.addCommand("NOTICE", NoticeCommand(this.server))
         this.addCommand("PING", PingCommand(this.server))
+        this.addCommand("MOTD", MotdCommand(this.server))
+        this.addCommand("WHOIS", WhoisCommand(this.server))
     }
 
     fun getCommand(mainCommand: String): Command? {
         return this.commands[mainCommand.toUpperCase()]
     }
 
-    fun commandExists(mainCommand: String) = this.commands.containsKey(mainCommand)
+    fun commandExists(mainCommand: String) = this.commands.containsKey(mainCommand.toUpperCase())
 
     fun execute(client: IClient, mainCommand: String, command: String) {
         Log.info(this.javaClass, "{${client.info().id}} executing command '$command'")

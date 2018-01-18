@@ -11,7 +11,7 @@ class UserCommand(server: IRCServer) : Command(server) {
         if (client.state() == ClientState.CONNECTING) {
             val parameters = command.split(Regex(" +"))
             val username = parameters[1]
-            val fullname = parameters.subList(4, parameters.size).joinToString(" ")
+            val fullname = parameters.subList(4, parameters.size).joinToString(" ").substring(1)
             with(client.info()) {
                 this.username = username
                 this.fullname = fullname
