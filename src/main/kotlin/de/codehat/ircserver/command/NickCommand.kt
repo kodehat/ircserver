@@ -1,15 +1,17 @@
 package de.codehat.ircserver.command
 
+import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.client.ClientList
 import de.codehat.ircserver.client.ClientState
 import de.codehat.ircserver.client.IClient
 import de.codehat.ircserver.server.IRCServer
 import de.codehat.ircserver.util.Entry
+import de.codehat.ircserver.util.ResponseEntry
 
 class NickCommand(server: IRCServer): Command(server) {
 
-    override fun execute(client: IClient, command: String) {
-        val parameter = command.split(Regex(" +"))
+    override fun execute(client: IClient, command: ParsedMessage) {
+        val parameter = command.params!!
         val nick = parameter[parameter.size - 1]
 
         if (client.state() == ClientState.CONNECTING) {
@@ -18,7 +20,7 @@ class NickCommand(server: IRCServer): Command(server) {
                         .add("host", this.server.host)
                         .add("nick", nick)
                         .render()
-                client.queue().put(Entry(client, response))
+                client.queue().put(ResponseEntry(client, response))
             } else { // Nick still can be used
                 client.info().nickname = nick
             }
@@ -29,20 +31,20 @@ class NickCommand(server: IRCServer): Command(server) {
                         .add("nick", client.info().nickname)
                         .add("user", client.info().username)
                         .render()
-                client.queue().put(Entry(client, response))
+                client.queue().put(ResponseEntry(client, response))
                 val rplYourHost = Message.RPL_YOURHOST.getTemplate()
                         .add("host", this.server.host)
                         .add("nick", client.info().nickname)
                         .add("server_name", this.server.servername)
                         .add("version", this.server.version)
                         .render()
-                client.queue().put(Entry(client, rplYourHost))
+                client.queue().put(ResponseEntry(client, rplYourHost))
                 val rplCreated = Message.RPL_CREATED.getTemplate()
                         .add("host", this.server.host)
                         .add("nick", client.info().nickname)
                         .add("date", this.server.date.toString())
                         .render()
-                client.queue().put(Entry(client, rplCreated))
+                client.queue().put(ResponseEntry(client, rplCreated))
                 val rplMyInfo = Message.RPL_MYINFO.getTemplate()
                         .add("host", this.server.host)
                         .add("nick", client.info().nickname)
@@ -51,7 +53,7 @@ class NickCommand(server: IRCServer): Command(server) {
                         .add("user_modes", "ao")
                         .add("chan_modes", "mtov")
                         .render()
-                client.queue().put(Entry(client, rplMyInfo))
+                client.queue().put(ResponseEntry(client, rplMyInfo))
             }
 
         } else if (client.state() == ClientState.CONNECTED) {

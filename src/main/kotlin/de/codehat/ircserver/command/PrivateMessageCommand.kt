@@ -1,26 +1,28 @@
 package de.codehat.ircserver.command
 
+import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.client.ClientList
 import de.codehat.ircserver.client.ClientState
 import de.codehat.ircserver.client.IClient
 import de.codehat.ircserver.server.IRCServer
 import de.codehat.ircserver.util.Entry
+import de.codehat.ircserver.util.ResponseEntry
 
 class PrivateMessageCommand(server: IRCServer): Command(server) {
 
-    override fun execute(client: IClient, command: String) {
+    override fun execute(client: IClient, command: ParsedMessage) {
         if (client.state() != ClientState.CONNECTED) {
             return
         }
 
-        val parameters = command.split(Regex(" +"))
+        val parameters = command.params!!
 
         // nick parameter is missing
         if (parameters.size < 2) {
             val rplNoRecipient = Message.ERR_NORECIPIENT.getTemplate()
                     .add("nick", client.info().nickname)
                     .render()
-            client.queue().put(Entry(client, rplNoRecipient))
+            client.queue().put(ResponseEntry(client, rplNoRecipient))
             return
         }
 
@@ -29,7 +31,7 @@ class PrivateMessageCommand(server: IRCServer): Command(server) {
             val rplNoTextToSend = Message.ERR_NOTEXTTOSEND.getTemplate()
                     .add("nick", client.info().nickname)
                     .render()
-            client.queue().put(Entry(client, rplNoTextToSend))
+            client.queue().put(ResponseEntry(client, rplNoTextToSend))
             return
         }
 
@@ -43,7 +45,7 @@ class PrivateMessageCommand(server: IRCServer): Command(server) {
                     .add("nick", client.info().nickname)
                     .add("unknown_nick", targetClientNick)
                     .render()
-            client.queue().put(Entry(client, rplNoSuchNick))
+            client.queue().put(ResponseEntry(client, rplNoSuchNick))
             return
         }
 
@@ -55,7 +57,7 @@ class PrivateMessageCommand(server: IRCServer): Command(server) {
                 .add("target", targetClient.info().nickname)
                 .add("message", message)
                 .render()
-        targetClient.queue().put(Entry(client, nonMessage))
+        targetClient.queue().put(ResponseEntry(client, nonMessage))
     }
 
 }

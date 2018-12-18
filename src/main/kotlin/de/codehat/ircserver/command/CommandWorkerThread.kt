@@ -1,12 +1,12 @@
 package de.codehat.ircserver.command
 
+import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.client.IClient
-import de.codehat.ircserver.util.CommandQueue
-import de.codehat.ircserver.util.Entry
-import de.codehat.ircserver.util.Log
+import de.codehat.ircserver.util.*
+import javafx.beans.binding.ObjectExpression
 
 class CommandWorkerThread(private val queue: CommandQueue,
-                          private val commandAction: (client: IClient, command: String) -> Unit): Thread() {
+                          private val commandAction: (client: IClient, command: Any) -> Unit): Thread() {
 
     var isRunning = false
 
@@ -21,10 +21,14 @@ class CommandWorkerThread(private val queue: CommandQueue,
             try {
                 fromQueue = this.queue.get()
 
-                this.commandAction(fromQueue.client, fromQueue.command)
+                if (fromQueue is SendEntry) {
+                    this.commandAction(fromQueue.client, fromQueue.command)
+                } else if (fromQueue is ResponseEntry) {
+                    this.commandAction(fromQueue.client, fromQueue.response)
+                }
             } catch (e: InterruptedException) {
                 this.isRunning = false
-                Log.Companion.info(this.javaClass, "Queue was interrupted")
+                Log.info(this.javaClass, "Queue was interrupted")
             }
         }
     }

@@ -8,6 +8,5 @@ class CommandQueue {
 
     fun get(): Entry = this.queue.take()
     fun put(entry: Entry) = this.queue.put(entry)
-    fun size() = this.queue.size
 
 }

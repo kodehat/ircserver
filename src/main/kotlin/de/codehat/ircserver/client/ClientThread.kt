@@ -7,6 +7,8 @@ import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.command.Message
 import de.codehat.ircserver.util.Entry
 import de.codehat.ircserver.util.Log
+import de.codehat.ircserver.util.ResponseEntry
+import de.codehat.ircserver.util.SendEntry
 import org.antlr.v4.runtime.ANTLRInputStream
 import org.antlr.v4.runtime.CommonTokenStream
 import java.io.BufferedReader
@@ -26,22 +28,21 @@ class ClientThread(private val client: Client, private val socket: Socket) : Run
         Log.info(this.javaClass, "${getId()} started his thread")
         try {
             this.inputStream.forEachLine {
-
                 val parsedMessage = parse(it + "\n")
-
-                val commandParts = it.trim().split(Regex(" +"))
                 Log.info(this.javaClass, "Got command '${parsedMessage.command}'")
+
                 if (parsedMessage.command == "PONG") return@forEachLine // silently drop "PONG" command
-                if (!this.client.server.commandRegistry.commandExists(commandParts[0])) {
+
+                if (!this.client.server.commandRegistry.commandExists(parsedMessage.command)) {
                     val response = Message.ERR_UNKNOWNCOMMAND.getTemplate()
                             .add("nick", this.client.info().nickname ?: "*")
                             .add("command", it)
                             .render()
-                    Log.info(this.javaClass, "${getId()} sent unknown command '$it'")
-                    this.client.queue().put(Entry(this.client, response))
+                    Log.info(this.javaClass, "${getId()} sent unknown command '${parsedMessage.command}'")
+                    this.client.queue().put(ResponseEntry(this.client, response))
                 } else {
-                    Log.info(this.javaClass, "${getId()} sent command '${commandParts[0]}'")
-                    this.client.server.queue.put(Entry(this.client, it))
+                    Log.info(this.javaClass, "${getId()} sent command '${parsedMessage.command}'")
+                    this.client.server.queue.put(SendEntry(this.client, parsedMessage))
                 }
             }
         } catch (e: SocketException) {
@@ -64,7 +65,7 @@ class ClientThread(private val client: Client, private val socket: Socket) : Run
         val walker = ParseTreeWalker()
         val listener = IRCMessageListener()
         walker.walk(listener, tree)
-        return ParsedMessage(listener.prefix, listener.command!!, listener.params!!)
+        return ParsedMessage(listener.prefix, listener.command!!, listener.params)
     }
 
 }

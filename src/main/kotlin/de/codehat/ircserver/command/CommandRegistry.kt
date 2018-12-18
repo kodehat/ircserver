@@ -1,5 +1,6 @@
 package de.codehat.ircserver.command
 
+import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.client.IClient
 import de.codehat.ircserver.server.IRCServer
 import de.codehat.ircserver.util.Log
@@ -25,9 +26,9 @@ class CommandRegistry(private val server: IRCServer) {
 
     fun commandExists(mainCommand: String) = this.commands.containsKey(mainCommand.toUpperCase())
 
-    fun execute(client: IClient, mainCommand: String, command: String) {
-        Log.info(this.javaClass, "{${client.info().id}} executing command '$command'")
-        this.getCommand(mainCommand)?.execute(client, command)
+    fun execute(client: IClient, parsedMessage: ParsedMessage) {
+        Log.info(this.javaClass, "{${client.info().id}} executing command '${parsedMessage.command}'")
+        this.getCommand(parsedMessage.command)?.execute(client, parsedMessage)
     }
 
     private fun addCommand(mainCommand: String, command: Command) {

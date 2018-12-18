@@ -12,10 +12,10 @@ class Client(private val socket: Socket, private val clientInfo: ClientInfo, val
     val clientThread = ClientThread(this, this.socket)
     private val queue = CommandQueue()
     private val outputStream = PrintWriter(this.socket.getOutputStream(), true)
-    private val commandThread = CommandWorkerThread(this.queue, { _, cmd ->
+    private val commandThread = CommandWorkerThread(this.queue) { _, cmd ->
         Log.info(this.javaClass, "Sending '$cmd' to client with id ${this.clientInfo.id}")
         this.outputStream.println(cmd)
-    })
+    }
 
     override fun start() {
         if (this.commandThread.isRunning && this.clientThread.isRunning) throw ClientAlreadyStartedException()

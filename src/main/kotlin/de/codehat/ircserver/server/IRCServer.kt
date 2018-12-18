@@ -1,5 +1,6 @@
 package de.codehat.ircserver.server
 
+import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.command.CommandRegistry
 import de.codehat.ircserver.command.CommandWorkerThread
 import de.codehat.ircserver.util.CommandQueue
@@ -29,9 +30,9 @@ class IRCServer(val host: String,
         return motdFile.inputStream().bufferedReader().lines().collect(Collectors.toList())
     }
 
-    private val commandThread = CommandWorkerThread(this.queue, { client, cmd ->
-        this.commandRegistry.execute(client, cmd.split(Regex(" +"))[0], cmd)
-    })
+    private val commandThread = CommandWorkerThread(this.queue) { client, cmd ->
+        this.commandRegistry.execute(client, cmd as ParsedMessage)
+    }
 
     override fun start() {
         if (this.serverThread.isRunning) throw ServerAlreadyStartedException()
