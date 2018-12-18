@@ -1,12 +1,21 @@
 package de.codehat.ircserver.client
 
+import de.codehat.ircserver.antlr4.IRCGrammarLexer
+import de.codehat.ircserver.antlr4.IRCGrammarParser
+import de.codehat.ircserver.antlr4.IRCMessageListener
+import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.command.Message
 import de.codehat.ircserver.util.Entry
 import de.codehat.ircserver.util.Log
+import org.antlr.v4.runtime.ANTLRInputStream
+import org.antlr.v4.runtime.CommonTokenStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
 import java.net.SocketException
+import org.antlr.v4.runtime.tree.ParseTreeWalker
+
+
 
 class ClientThread(private val client: Client, private val socket: Socket) : Runnable {
 
@@ -17,9 +26,12 @@ class ClientThread(private val client: Client, private val socket: Socket) : Run
         Log.info(this.javaClass, "${getId()} started his thread")
         try {
             this.inputStream.forEachLine {
+
+                val parsedMessage = parse(it + "\n")
+
                 val commandParts = it.trim().split(Regex(" +"))
-                Log.info(this.javaClass, "Got command '${commandParts[0]}'")
-                if (commandParts[0] == "PONG") return@forEachLine // silently drop "PONG" command
+                Log.info(this.javaClass, "Got command '${parsedMessage.command}'")
+                if (parsedMessage.command == "PONG") return@forEachLine // silently drop "PONG" command
                 if (!this.client.server.commandRegistry.commandExists(commandParts[0])) {
                     val response = Message.ERR_UNKNOWNCOMMAND.getTemplate()
                             .add("nick", this.client.info().nickname ?: "*")
@@ -42,5 +54,17 @@ class ClientThread(private val client: Client, private val socket: Socket) : Run
     }
 
     private fun getId() = "{${this.client.info().id}}"
+
+    private fun parse(message: String): ParsedMessage {
+        val input = ANTLRInputStream(message)
+        val lexer = IRCGrammarLexer(input)
+        val tokens = CommonTokenStream(lexer)
+        val parser = IRCGrammarParser(tokens)
+        val tree = parser.message()
+        val walker = ParseTreeWalker()
+        val listener = IRCMessageListener()
+        walker.walk(listener, tree)
+        return ParsedMessage(listener.prefix, listener.command!!, listener.params!!)
+    }
 
 }
