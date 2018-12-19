@@ -1,9 +1,7 @@
 package de.codehat.ircserver.command
 
-import de.codehat.ircserver.antlr4.ParsedMessage
 import de.codehat.ircserver.client.IClient
 import de.codehat.ircserver.util.*
-import javafx.beans.binding.ObjectExpression
 
 class CommandWorkerThread(private val queue: CommandQueue,
                           private val commandAction: (client: IClient, command: Any) -> Unit): Thread() {

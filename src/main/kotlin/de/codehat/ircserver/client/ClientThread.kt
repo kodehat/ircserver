@@ -17,8 +17,6 @@ import java.net.Socket
 import java.net.SocketException
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 
-
-
 class ClientThread(private val client: Client, private val socket: Socket) : Runnable {
 
     var isRunning = false
